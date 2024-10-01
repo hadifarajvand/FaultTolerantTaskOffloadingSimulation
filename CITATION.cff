@@ -1,6 +1,5 @@
-@software{Fault-Tolerant Task Offloading Simulation Using DDPG,
+@Simulator{Fault-Tolerant Task Offloading Simulation Using DDPG,
   author = {Vahide Babaiyan},
-  month = {12},
   title = {{Fault-Tolerant Task Offloading Simulation Using DDPG}},
   url = {https://github.com/vahide-b-84/FaultTolerantTaskOffloadingSimulation},
   version = {1.0.0},
