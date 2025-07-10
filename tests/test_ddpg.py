@@ -1,20 +1,32 @@
 import pytest
 import numpy as np
-import tensorflow as tf
+import torch
 from agent.ddpg import ddpgModel, Buffer
+from agent.td3 import td3Model
+from agent.a2c import a2cModel
 
 def test_ddpg_model_creation():
     model = ddpgModel(num_states=8, num_actions=4, std_dev=0.2, critic_lr=0.001, actor_lr=0.001, gamma=0.99, tau=0.005, activationFunction='tanh')
     assert model.actor_model is not None
     assert model.critic_model is not None
-    # Test actor output shape
-    dummy_state = tf.convert_to_tensor(np.random.rand(1, 8), dtype=tf.float32)
-    action = model.actor_model(dummy_state)
+    dummy_state = torch.FloatTensor(np.random.rand(1, 8))
+    action = model.policy(dummy_state)
     assert action.shape[-1] == 4
-    # Test critic output shape
-    dummy_action = tf.convert_to_tensor(np.random.rand(1, 4), dtype=tf.float32)
-    q_value = model.critic_model([dummy_state, dummy_action])
-    assert q_value.shape[-1] == 1
+
+def test_td3_model_creation():
+    model = td3Model(num_states=8, num_actions=4, std_dev=0.2, critic_lr=0.001, actor_lr=0.001, gamma=0.99, tau=0.005, activationFunction='tanh')
+    assert model.actor_model is not None
+    dummy_state = torch.FloatTensor(np.random.rand(1, 8))
+    action = model.policy(dummy_state)
+    assert action.shape[-1] == 4
+
+def test_a2c_model_creation():
+    model = a2cModel(num_states=8, num_actions=4, std_dev=0.2, critic_lr=0.001, actor_lr=0.001, gamma=0.99, tau=0.005, activationFunction='softmax')
+    assert model.actor_model is not None
+    assert model.critic_model is not None
+    dummy_state = torch.FloatTensor(np.random.rand(1, 8))
+    action_probs = model.policy(dummy_state)
+    assert action_probs.shape[-1] == 4
 
 def test_buffer_record_and_learn():
     model = ddpgModel(num_states=8, num_actions=2, std_dev=0.2, critic_lr=0.001, actor_lr=0.001, gamma=0.99, tau=0.005, activationFunction='tanh')

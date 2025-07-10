@@ -29,6 +29,7 @@ class params:
     TASK_ARRIVAL_RATE = config.get('TASK_ARRIVAL_RATE')
     rsu_to_edge_profile = config.get('rsu_to_edge_profile')
     rsu_to_cloud_profile = config.get('rsu_to_cloud_profile')
+    AGENT_TYPE = config.get('AGENT_TYPE', 'ddpg')
 
     @staticmethod
     def compute_Alpha():
@@ -58,6 +59,20 @@ class params:
     def compute_num_actions():
         serverNo = params.NUM_EDGE_SERVERS + params.NUM_CLOUD_SERVERS
         return (serverNo * serverNo) + (serverNo * (serverNo - 1)) // 2
+
+    @staticmethod
+    def get_agent_class():
+        if params.AGENT_TYPE == 'ddpg':
+            from agent.ddpg import ddpgModel
+            return ddpgModel
+        elif params.AGENT_TYPE == 'td3':
+            from agent.td3 import td3Model
+            return td3Model
+        elif params.AGENT_TYPE == 'a2c':
+            from agent.a2c import a2cModel
+            return a2cModel
+        else:
+            raise ValueError(f"Unknown AGENT_TYPE: {params.AGENT_TYPE}")
 
 # Set num_actions after class definition
 params.num_actions = params.compute_num_actions()

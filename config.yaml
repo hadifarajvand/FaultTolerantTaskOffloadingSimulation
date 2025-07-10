@@ -4,7 +4,7 @@ Permutation_Number: 1
 NUM_EDGE_SERVERS: 6
 NUM_CLOUD_SERVERS: 2
 taskno: 200
-total_episodes: 300
+total_episodes: 10
 std_dev: 0.25
 critic_lr: 0.001
 actor_lr: 0.0003
@@ -25,6 +25,7 @@ rsu_to_edge_profile:
 rsu_to_cloud_profile:
   bandwidth: 8
   propagation_delay: 1
+AGENT_TYPE: ddpg
 
 # State and failure model definitions
 STATES:

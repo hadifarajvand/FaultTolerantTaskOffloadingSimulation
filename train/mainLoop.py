@@ -9,7 +9,7 @@ from env.EnvState import EnvironmentState
 from utils.params import params
 
 import simpy
-import tensorflow as tf
+import torch
 import numpy as np
 import json
 import os
@@ -53,8 +53,10 @@ class MainLoop:
         self.task_Assignments_info = []
         self.SCENARIO_TYPE=params.SCENARIO_TYPE
         self.Permutation_Number=params.Permutation_Number
-          
-        self.csv_log_file = 'training_log.csv'
+        self.agent_type = params.AGENT_TYPE
+        self.log_dir = os.path.join('logs', self.agent_type)
+        os.makedirs(self.log_dir, exist_ok=True)
+        self.csv_log_file = os.path.join(self.log_dir, 'training_log.csv')
         with open(self.csv_log_file, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['episode', 'episodic_reward', 'avg_reward', 'episodic_delay', 'avg_delay'])
@@ -107,7 +109,7 @@ class MainLoop:
             #create the next state vector
             self.G_state = self.convert_state_to_normalized_array(self.env_state.get_state(), task) 
             
-            tf_state = tf.expand_dims(tf.convert_to_tensor(self.G_state), 0)
+            torch_state = torch.FloatTensor(self.G_state).unsqueeze(0)
 
             #add this state to the last pending tuple in tempBuffer
             if self.taskCounter>1:
@@ -116,8 +118,9 @@ class MainLoop:
                 self.tempbuffer[self.taskCounter-1]=tuple(tempx)
                 self.add_train()
 
-            self.G_action = self.dm.policy(tf_state)
-            self.G_action=self.G_action.numpy().tolist()  
+            self.G_action = self.dm.policy(torch_state)
+            if isinstance(self.G_action, torch.Tensor):
+                self.G_action = self.G_action.detach().cpu().numpy().tolist()
             
             self.G_action=self.dm.addNoise(self.G_action,self.this_episode,self.total_episodes)
             X, Y, Z = self.extract_parameters() # (primary, backup, z) according to self.G_action
@@ -252,8 +255,8 @@ class MainLoop:
             self.actor_loss.append(self.dm.actor_loss)
             self.critic_loss.append(self.dm.critic_loss)
             '''
-            self.dm.update_target(self.dm.target_actor.variables, self.dm.actor_model.variables)
-            self.dm.update_target(self.dm.target_critic.variables, self.dm.critic_model.variables)
+            self.dm.update_target(self.dm.target_actor, self.dm.actor_model)
+            self.dm.update_target(self.dm.target_critic, self.dm.critic_model)
         
         #compute pending rewards
         removeList=[]
@@ -274,8 +277,8 @@ class MainLoop:
                 #
                 #print("training....")
                 self.buffer.learn()
-                self.dm.update_target(self.dm.target_actor.variables, self.dm.actor_model.variables)
-                self.dm.update_target(self.dm.target_critic.variables, self.dm.critic_model.variables)
+                self.dm.update_target(self.dm.target_actor, self.dm.actor_model)
+                self.dm.update_target(self.dm.target_critic, self.dm.critic_model)
                 #
                 removeList.append(taskid)
         
