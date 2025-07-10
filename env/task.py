@@ -2,7 +2,7 @@
 
 # task.py
 
-from params import params
+from utils.params import params
 import pandas as pd
 import math
 import random

@@ -2,16 +2,12 @@
 import sys
 import os
 
-# Append the parent directory (simulator) to sys.path
+# Add project root to sys.path for local imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-# Now you can import modules from the root directory
-from ddpg import ddpgModel, Buffer  # Import from root directory
 
-
-# Import modules from the current directory
-from save_parameters_and_logs import save_params_and_logs  # Import from current directory
-from params import params  # Import from current directory
-from mainLoop import MainLoop  # Import from current directory
+from agent.ddpg import ddpgModel, Buffer
+from utils.params import params
+from train.mainLoop import MainLoop
 
 
 # Function to run your simulation
@@ -31,7 +27,7 @@ def run_simulation():
     ml.EP() 
 
     # Save parameters and logs after simulation ends
-    save_params_and_logs(params, ml.log_data, ml.task_Assignments_info)
+    # Remove any usage of save_params_and_logs in this file
 
 
 # Main script to run all simulations

@@ -3,11 +3,10 @@
 # mainLoop.py
 
 
-from server import Server
-from task import Task
-from EnvState import EnvironmentState
-from params import params
-from save_parameters_and_logs import save_params_and_logs
+from env.server import Server
+from env.task import Task
+from env.EnvState import EnvironmentState
+from utils.params import params
 
 import simpy
 import tensorflow as tf
@@ -17,6 +16,8 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+# import wandb  # Removed wandb import since we now use CSV logging
+import csv
 
 
 class MainLoop:
@@ -53,6 +54,11 @@ class MainLoop:
         self.SCENARIO_TYPE=params.SCENARIO_TYPE
         self.Permutation_Number=params.Permutation_Number
           
+        self.csv_log_file = 'training_log.csv'
+        with open(self.csv_log_file, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['episode', 'episodic_reward', 'avg_reward', 'episodic_delay', 'avg_delay'])
+        
     def EP(self):
         
         while self.this_episode<self.total_episodes:
@@ -83,8 +89,9 @@ class MainLoop:
             
             
         # Plot the rewards after all episodes are completed
-        self.plot_rewards()
-        #self.plot_losses()
+        # self.plot_rewards()  # Comment out static plot
+        # self.plot_losses()   # Comment out static plot
+        # wandb.finish() # Removed wandb.finish()
 
     def Iteration(self):
         
@@ -158,6 +165,11 @@ class MainLoop:
         avg_reward = np.mean(self.ep_reward_list[-40:])
         avg_delay=np.mean(self.ep_delay_list[-40:])
         self.log_data.append((self.this_episode, avg_reward, self.episodic_reward,avg_delay))
+
+        # Log to CSV
+        with open(self.csv_log_file, 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow([self.this_episode, self.episodic_reward, avg_reward, self.episodic_delay, avg_delay])
 
         print("Proposed Approach: Episode * {} * Avg Reward is ==> {}".format(self.this_episode, avg_reward),"This episode:",self.episodic_reward)
         #print("Episode * {} * Total Reward is ==> {}".format(self.this_episode, self.episodic_reward))

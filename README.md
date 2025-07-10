@@ -1,53 +1,88 @@
-# FaultTolerantTaskOffloadingSimulation
-This project proposes a DRL-based fault-tolerant task offloading method for Mobile Edge-Cloud Computing. Using a DDPG algorithm, it minimizes latency and enhances reliability for delay-sensitive tasks in dynamic environments while adapting to resource fluctuations and failure rates.
-# User Guide for the Simulator
+# Fault-Tolerant Task Offloading Simulation (v2)
 
+This project simulates a Mobile Edge-Cloud Computing environment using Deep Reinforcement Learning (DDPG) for fault-tolerant task offloading. The codebase is modular, extensible, and supports modern experiment tracking and configuration management.
 
+## Features
+- Modular structure: `env/`, `agent/`, `train/`, `utils/`, `tests/`
+- YAML-based configuration (see `config.yaml`)
+- Custom DDPG implementation (easily extensible)
+- Modern experiment tracking with [Weights & Biases (wandb)](https://wandb.ai/)
+- Unit and integration tests (`pytest`)
+- API documentation with [MkDocs](https://www.mkdocs.org/)
+- Performance profiling and support for parallel/distributed execution
 
-Before starting, please ensure that you have installed the following libraries:
+## Setup
 
-Python version: **3.7.16**
+### Requirements
+- Python 3.7+
+- Install dependencies:
+  ```bash
+  pip install -r requirements.txt
+  pip install wandb mkdocs pytest
+  ```
 
-The following libraries are utilized in the simulator:
+### Configuration
+- All simulation parameters are in `config.yaml`.
+- Edit this file to change scenario, server/task counts, RL hyperparameters, etc.
 
-itertools: Provides functions for creating iterators for efficient looping.
-scipy.stats: Contains statistical functions, including probability distributions.
-pandas: A data manipulation and analysis library, ideal for handling data structures.
-random: Implements pseudo-random number generators for various distributions.
-configuration: Imports parameter configurations specific to the simulation.
-numpy: A library for numerical computations, offering support for large, multi-dimensional arrays and matrices.
-truncnorm: From scipy.stats, it is used for truncated normal distributions (in ddpg.py).
-tensorflow: An open-source machine learning library used for building and training models.
-keras: A high-level neural networks API that runs on top of TensorFlow.
-simpy: A process-based discrete-event simulation framework.
-params: Imports parameter definitions specific to the simulation.
-math: Provides mathematical functions.
-os: Provides a way of using operating system-dependent functionality.
-openpyxl: A library for reading and writing Excel files, used here for managing results.
-Image and BarChart: From openpyxl.drawing.image and openpyxl.chart, respectively, for handling images and creating charts in Excel files.
+## Usage
 
+### 1. Generate Parameters
+```bash
+python -m utils.generate_server_and_task_parameters
+```
 
+### 2. Run Simulation
+```bash
+python -m train.ddpg_main
+```
+- Results and metrics are logged to [wandb](https://wandb.ai/).
 
-## Starting the Simulation
+### 3. Run Tests
+```bash
+pytest tests/
+```
 
-To begin the simulation, you first need to run the following file to generate parameters related to tasks and servers:
+### 4. Build/View Documentation
+```bash
+mkdocs serve
+# or
+mkdocs build
+```
+- Docs are in the `docs/` directory.
 
-- `generate_server_and_task_parameters.py`
+## Modular Structure
+- `env/`: Environment classes (`EnvState`, `Server`, `Task`)
+- `agent/`: RL agent (`ddpgModel`, `Buffer`)
+- `train/`: Training loop and experiment entry point
+- `utils/`: Config loader, parameter management, (deprecated) logging
+- `tests/`: Unit/integration tests
 
-Then, navigate to the Proposed Approach subfolder and execute the following file in the VSCode environment:
+## Experiment Tracking
+- All metrics, hyperparameters, and plots are logged to [wandb](https://wandb.ai/).
+- Set your wandb API key with `wandb login` before running experiments.
 
-- `ddpg_main.py`
+## Performance Profiling
+- Use Python profilers (e.g., `cProfile`, `line_profiler`) for bottleneck analysis.
+- For parallel/distributed runs, consider [Ray](https://docs.ray.io/en/latest/) or [joblib](https://joblib.readthedocs.io/).
 
-### Configuring Scenarios
+## API Documentation
+- All classes and functions have comprehensive docstrings.
+- Browse the API docs with MkDocs (`mkdocs serve`).
 
-To run scenarios for high and low failure rates, simply set the `permutation_numbers` in the `ddpg_main.py` file as follows:
+## Example: Customizing a Scenario
+Edit `config.yaml`:
+```yaml
+SCENARIO_TYPE: heterogeneous
+NUM_EDGE_SERVERS: 8
+NUM_CLOUD_SERVERS: 3
+# ...
+```
+Then rerun the parameter generation and simulation.
 
-- For low failure rate: `permutation_numbers = [1]`
-- For high failure rate: `permutation_numbers = [3]`
+## Citing
+If you use this simulator, please cite as described in `CITATION.cff`.
 
-## Simulator Features
-
-The simulator is designed to support the execution of homogeneous and heterogeneous scenarios, as well as high, low, and medium failure rates. Additionally, the code allows for switching between different failure modes.
-
-Finally, after successfully running the simulation, results will be saved in the **Homogeneous_Results** or **Heterogeneous_Results** folders based on the executed scenario.
+---
+For more details, see the [documentation](docs/).
 

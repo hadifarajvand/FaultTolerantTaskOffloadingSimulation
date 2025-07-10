@@ -8,7 +8,23 @@ tf.config.functions_run_eagerly()
 #tf.config.run_functions_eagerly(True)
 
 class ddpgModel:
-    def __init__(self,num_states,num_actions,std_dev,critic_lr,actor_lr,gamma,tau,activationFunction):
+    """
+    Deep Deterministic Policy Gradient (DDPG) model for continuous control.
+    Contains actor and critic networks, target networks, and noise process.
+    """
+    def __init__(self, num_states, num_actions, std_dev, critic_lr, actor_lr, gamma, tau, activationFunction):
+        """
+        Initialize the DDPG model with actor/critic networks and optimizers.
+        Args:
+            num_states (int): Number of state features.
+            num_actions (int): Number of action dimensions.
+            std_dev (float): Standard deviation for exploration noise.
+            critic_lr (float): Learning rate for critic.
+            actor_lr (float): Learning rate for actor.
+            gamma (float): Discount factor.
+            tau (float): Soft update rate for target networks.
+            activationFunction (str): Activation function for actor output.
+        """
         self.activationFunction=activationFunction # string: tanh , softmax
         self.num_states=num_states
         self.num_actions=num_actions
@@ -120,7 +136,11 @@ class ddpgModel:
 
 
 class OUActionNoise:
+    """
+    Ornstein-Uhlenbeck process for temporally correlated exploration noise.
+    """
     def __init__(self, mean, std_deviation, theta=0.15, dt=1e-2, x_initial=None):
+        """Initialize the OU noise process."""
         self.theta = theta
         self.mean = mean
         self.std_dev = std_deviation
@@ -129,6 +149,7 @@ class OUActionNoise:
         self.reset()
 
     def __call__(self):
+        """Generate a new noise sample."""
         # Formula taken from https://www.wikipedia.org/wiki/Ornstein-Uhlenbeck_process.
         x = (
             self.x_prev
@@ -141,6 +162,7 @@ class OUActionNoise:
         return x
 
     def reset(self):
+        """Reset the noise process to initial state."""
         if self.x_initial is not None:
             self.x_prev = self.x_initial
         else:
@@ -148,7 +170,12 @@ class OUActionNoise:
 
 
 class Buffer:
-    def __init__(self,ddpgObj, buffer_capacity=100000, batch_size=64):
+    """
+    Experience replay buffer for DDPG agent.
+    Stores (state, action, reward, next_state) tuples and samples minibatches for training.
+    """
+    def __init__(self, ddpgObj, buffer_capacity=100000, batch_size=64):
+        """Initialize the buffer with given capacity and batch size."""
         self.ddpgObj=ddpgObj
         # Number of "experiences" to store at max
         self.buffer_capacity = buffer_capacity
@@ -165,8 +192,8 @@ class Buffer:
         self.reward_buffer = np.zeros((self.buffer_capacity, 1))
         self.next_state_buffer = np.zeros((self.buffer_capacity, self.ddpgObj.num_states))
 
-    # Takes (s,a,r,s') obervation tuple as input
     def record(self, obs_tuple):
+        """Store a new experience tuple in the buffer."""
         # Set index to zero if buffer_capacity is exceeded,
         # replacing old records
         index = self.buffer_counter % self.buffer_capacity
@@ -185,6 +212,7 @@ class Buffer:
     def update(
         self, state_batch, action_batch, reward_batch, next_state_batch,
     ):
+        """Update actor and critic networks using a minibatch of experiences."""
         # Training and updating Actor & Critic networks.
         # See Pseudo Code.
         with tf.GradientTape() as tape:
@@ -219,6 +247,7 @@ class Buffer:
 
     # We compute the loss and update parameters
     def learn(self):
+        """Sample a minibatch and perform a learning step."""
         # Get sampling range
         record_range = min(self.buffer_counter, self.buffer_capacity)
         # Randomly sample indices

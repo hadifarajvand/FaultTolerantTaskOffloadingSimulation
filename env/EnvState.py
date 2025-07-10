@@ -1,8 +1,14 @@
 
 #EnvState.py
 import numpy as np
+
 class EnvironmentState:
+    """
+    Manages the state of the simulation environment, including servers, tasks, and their assignments.
+    Provides methods for adding/removing servers and tasks, assigning/completing tasks, and retrieving state vectors.
+    """
     def __init__(self):
+        """Initialize the environment state with empty server and task dictionaries."""
         self.servers = {}  # Dictionary to store server objects {server_id: server_object, 'failure_rate': failure_rate, 'load': load}
         self.tasks = {}  # Dictionary to store generated task objects {task_id: task_object}
         

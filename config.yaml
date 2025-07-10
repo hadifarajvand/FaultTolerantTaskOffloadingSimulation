@@ -1,0 +1,64 @@
+# Main simulation parameters
+SCENARIO_TYPE: homogeneous
+Permutation_Number: 1
+NUM_EDGE_SERVERS: 6
+NUM_CLOUD_SERVERS: 2
+taskno: 200
+total_episodes: 300
+std_dev: 0.25
+critic_lr: 0.001
+actor_lr: 0.0003
+gamma: 0.85
+tau: 0.005
+buffer_capacity: 100000
+batch_size: 256
+activation_function: softmax
+TASK_ARRIVAL_RATE: 0.5
+TASK_SIZE_RANGE: [10, 100]
+Low_demand: 1
+High_demand: 100
+EDGE_PROCESSING_FREQ_RANGE: [10, 15]
+CLOUD_PROCESSING_FREQ_RANGE: [30, 60]
+rsu_to_edge_profile:
+  bandwidth: 1
+  propagation_delay: 0
+rsu_to_cloud_profile:
+  bandwidth: 8
+  propagation_delay: 1
+
+# State and failure model definitions
+STATES:
+  S1: [Low, 0.0]
+  S2: [High, 0.0]
+  S3: [Med, 0.0]
+
+# Example permutations (should be generated as needed)
+STATE_PERMUTATIONS:
+  - [S1, S2, S3]
+  - [S2, S3, S1]
+  - [S3, S1, S2]
+
+# Example failure rates (should be generated as needed)
+FAILURE_RATES:
+  edge:
+    homogeneous:
+      low: [0.0001, 0.1001]
+      high: [0.79, 0.89]
+      med: [0.55, 0.65]
+    heterogeneous:
+      low: [0.0001, 0.2001]
+      high: [0.79, 0.99]
+      med: [0.55, 0.75]
+  cloud:
+    homogeneous:
+      low: [1e-6, 2e-6]
+      high: [7.9e-6, 8.9e-6]
+      med: [5.5e-6, 6.5e-6]
+    heterogeneous:
+      low: [1e-6, 3e-6]
+      high: [7.9e-6, 9.9e-6]
+      med: [5.5e-6, 7.5e-6]
+
+# Derived parameters (can be computed at runtime if needed)
+num_states: 34  # 4 * 8 + 2 = 34
+# num_actions: 145  # Now computed dynamically in params.py 
